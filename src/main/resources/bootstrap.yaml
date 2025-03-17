@@ -1,0 +1,99 @@
+boot:
+  develop:
+    codegen:
+      basePackage: cn.com.mw
+      tableName: app_category_detail
+      directory: D://genfile/
+      author: ly
+      scene: 2
+# scene 2代表生成APP代码 默认是2  1为Web端代码生成
+  core:
+    appName: deve-auto
+    env: dev
+    port: 8093
+    version: 1.0.0
+  web:
+    redis:
+      enabled: true
+      host: 10.0.1.224
+      port: 6379
+      database: 2
+  mybatis:
+    datasource:
+      druidName: admin
+      druidPwd: admin123
+      allow: 127.0.0.1
+      master:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://10.0.1.220:3307/super_app?allowMultiQueries=true&useUnicode=true&useSSL=false
+        username: root
+        password: 123456
+      slave:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://10.0.1.220:3307/super_app_slave?allowMultiQueries=true&useUnicode=true&useSSL=false
+        username: root
+        password: 123456
+      gen:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://10.0.1.220:3307/super_app?allowMultiQueries=true&useUnicode=true&useSSL=false
+        username: root
+        password: 123456
+
+
+
+spring:
+  autoconfigure:
+    exclude:
+      - com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure #排除Druid自动配置
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration #排除Security自动配置
+  datasource:
+    dynamic:
+      primary: master #设置默认的数据源或者数据源组,默认值即为master
+      strict: false #严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
+      datasource:
+        master:
+          url: ${boot.mybatis.datasource.master.url}
+          username: ${boot.mybatis.datasource.master.username}
+          password: ${boot.mybatis.datasource.master.password}
+          driver-class-name: ${boot.mybatis.datasource.master.driverClassName}
+        slave:
+          url: ${boot.mybatis.datasource.slave.url}
+          username: ${boot.mybatis.datasource.slave.username}
+          password: ${boot.mybatis.datasource.slave.password}
+          driver-class-name: ${boot.mybatis.datasource.slave.driverClassName}
+    druid:
+      initial-size: 5 # 初始连接数
+      min-idle: 10 # 最小连接池数量
+      max-active: 20 # 最大连接池数量
+      max-wait: 600000 # 配置获取连接等待超时的时间，单位：毫秒
+      time-between-eviction-runs-millis: 60000 # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位：毫秒
+      min-evictable-idle-time-millis: 300000 # 配置一个连接在池中最小生存的时间，单位：毫秒
+      max-evictable-idle-time-millis: 900000 # 配置一个连接在池中最大生存的时间，单位：毫秒
+      validation-query: SELECT 1 FROM DUAL # 配置检测连接是否有效
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+      use-global-data-source-stat: true # 合并多个DruidDataSource的监控数据
+      filter:
+        # 慢SQL记录(sql语句执行时间超过某个界限就记录下来)
+        stat:
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      filters: stat
+      web-stat-filter:
+        enabled: true #是否开启web-jdbc监控 默认是false
+        profile-enable: true #是否开启web-jdbc监控 默认是false
+        url-pattern: /*
+        exclusions: /druid/*,*.gif,*.png,*.jpg,*.html,*.js,*.css,*.ico
+        session-stat-enable: true  #是否开启session统计 默认false
+        session-stat-max-count: 1000 # 设置session统计的最大值 默认是1000
+
+      stat-view-servlet:  # StatViewServlet配置
+        enabled: true # 是否开启druid的数据统计界面 默认false
+        url-pattern: /druid/*
+        login-username: admin  #登录监控界面的用户名以及密码，登录url为 IP:port/druid
+        login-password: admin123
+        allow: 127.0.0.1
+        deny:
+        reset-enable: false  #  HTML页面上的“Reset All”功能
